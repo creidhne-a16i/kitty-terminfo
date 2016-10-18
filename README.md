@@ -1,7 +1,7 @@
-#### kitty-terminfo
+## KiTTY-terminfo
 A bit better terminfo file for KiTTY (a PuTTY fork), based off comparison between xterm-256color, putty-256color and tmux-256color. This is supposed to correct the problems with arrows in tmux and vim, allow nice boxes (aptitude), and generally better represent capabilities of KiTTY than usual xterm\* or putty\* terminfo does.  
   
-###### installation
+### installation
 Clone the repository to your remote machine, then run:  
 ```
 tic -x kitty-terminfo/terminfo/xterm-kitty-256color.ti
@@ -47,7 +47,7 @@ Start KiTTY, make sure to keep following settings:
 - Connection > Data:
  * Terminal-type string: xterm-kitty-256color
 
-###### resources
+### resources
 http://www.nesssoftware.com/home/mwc/manpage.php?page=terminfo  
 https://www.freebsd.org/cgi/man.cgi?query=terminfo&sektion=5  
 http://www.comptechdoc.org/os/linux/howlinuxworks/linux_hltermcommands.html  
