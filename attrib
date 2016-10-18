@@ -1,0 +1,33 @@
+Xterm
+|Putty
+||Tmux
+XPT		am,					auto_right_margin - Automatic margins
+X T		AX,					(bool) Does understand ANSI set default fg/bg color (\E[39m  \E[49m). Also uses G0, S0 and E0 values. User definable
+XP		bce,				back_color_erase - Erase screen with background color
+ P		bw,					auto_left_margin - cub1 wraps from column 0 to last column. The terminal can can be wrap backwards to the previous line
+X		ccc,				can_change - Terminal can redefine a color
+XPT		colors#256,			max_colors - Maximum number of colors on the screen
+X T		cols#80,			Number of columns in a line
+  T		G0,					boolean capability for the terminal on which screen has been called, the terminal emulation of screen supports multiple character sets. Check bookmarks.
+ PT		hs,					Has an extra ``status line'' (xterm doesn't, putty does, tmux does)
+XPT		it#8				tabs initially n spaces
+X T		km,					Has a metakey (shift sets parity bit)
+X T		lines#24,			Number of lines on screen or page
+X		mc5i,				prtr_silent - Printer does not echo on screen
+XPT		mir,				Safe to move while in insert mode
+XPT		msgr,				move_standout_mode - Safe to move in standout modes
+ P		ncv#22,				This is a bit-mask of attributes (bold/underline etc) not to be used when colors are enabled. Check bookmarks
+X		npc,				no_pad_char - No padding character
+X T		OTbs,				obsolete, backspaces_with_bs, check bookmarks
+  T		OTpt,				obsolete, has_hardware_tabs, check bookmarks
+XPT		pairs#32767,		max_pairs - Maximum number of color_pairs on screen
+ PT		U8#1,				UTF-8 line-graphics with xterm, set to enabled. Uses acsc values
+XPT		xenl,				eat_newline_glitch - newline ignored after 80 cols (concept)
+ P		xon,				If the terminal uses xon/xoff handshaking for flow control (it automatically emits ^S back to the host when its input buffers are close to full)
+XP		XT,					Terminal understands special xterm sequences (OSC, mouse tracking).
+
+===========================
+
+X		acsc=``aaffggiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
+ P		acsc=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
+  T		acsc=++\,\,--..00``aaffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
