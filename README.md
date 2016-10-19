@@ -36,8 +36,9 @@ which should return "xterm-kitty-256color".
   
 ### Settings  
   
-Here's the key sequences KiTTY is sending when arrows and function keys are pressed:
-|           |     up    |    down   |   right   |    left   |
+Here's the key sequences KiTTY is sending when arrows and function keys are pressed:  
+  
+|   mode    |     up    |    down   |   right   |    left   |
 | --------: | :-------: | :-------: | :-------: | :-------: |
 | rmkx mode |   `^[[A`  |   `^[[B`  |   `^[[C`  |   `^[[D`  |
 | smkx mode |   `^[OA`  |   `^[OB`  |   `^[OC`  |   `^[OD`  |
