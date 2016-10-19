@@ -1,7 +1,7 @@
 ## KiTTY-terminfo
 A bit better terminfo file for KiTTY (a PuTTY fork), based off comparison between xterm-256color, putty-256color and tmux-256color. This is supposed to correct the problems with arrows in tmux and vim, allow nice boxes (aptitude), and generally better represent capabilities of KiTTY than usual xterm\* or putty\* terminfo does.  
   
-### installation
+### Installation
 This instruction assumes you have ncurses and libreadlinei6 or 7 installed.
 Clone the repository to your remote machine, then run:  
 ```
@@ -34,24 +34,28 @@ echo $TERM
 ```
 which should return "xterm-kitty-256color".  
   
-### settings  
+### Settings  
   
 Here's the key sequences KiTTY is sending when arrows and function keys are pressed:
-- | up | down | right | left
-rmkx mode | ^[[A | ^[[B | ^[[C | ^[[D
-smkx mode | ^[OA | ^[OB | ^[OC | ^[OD
-shift | ^[[1;2A | ^[[1;2B | ^[[1;2C | ^[[1;2D
-ctrl | ^[[1;5A | ^[[1;5B | ^[[1;5C | ^[[1;5D
-alt | ^[[1;3A | ^[[1;3B | ^[[1;3C | ^[[1;3D
+|           |     up    |    down   |   right   |    left   |
+| --------: | :-------: | :-------: | :-------: | :-------: |
+| rmkx mode |   `^[[A`  |   `^[[B`  |   `^[[C`  |   `^[[D`  |
+| smkx mode |   `^[OA`  |   `^[OB`  |   `^[OC`  |   `^[OD`  |
+|   shift   | `^[[1;2A` | `^[[1;2B` | `^[[1;2C` | `^[[1;2D` |
+|    ctrl   | `^[[1;5A` | `^[[1;5B` | `^[[1;5C` | `^[[1;5D` |
+|     alt   | `^[[1;3A` | `^[[1;3B` | `^[[1;3C` | `^[[1;3D` |
   
 If you disable "application cursor mode" in KiTTY > Terminal > Features, KiTTY won't switch into smkx mode, which I do not recommend.  
   
-ins | ^[[2~
-del | ^[[3~
-home | ^[[1~
-end | ^[[4~
-pgup | ^[[5~
-pgdn | ^[[6~
+| key | code |
+| ---: | :---: |
+| ins | `^[[2~` |
+| del | `^[[3~` |
+| home | `^[[1~` |
+| end | `^[[4~` |
+| pgup | `^[[5~` |
+| pgdn | `^[[6~` |
+  
 modifiers don't work with those function keys.  
 
 #### /etc/initrc or ~/.inputrc
@@ -61,7 +65,7 @@ For example, to use ctrl+left/right arrow to move between words in terminal, mak
 "\e[1;5C": forward-word
 "\e[1;5D": backward-word
 ```
-Other bindable readline commands can be found (here)[https://www.gnu.org/software/bash/manual/html_node/Bindable-Readline-Commands.html]  
+Other bindable readline commands can be found [here](https://www.gnu.org/software/bash/manual/html_node/Bindable-Readline-Commands.html)  
 
 #### ~/.tmux.conf
 Similarly, edit ~/.tmux.conf to at least set tmux terminal (included in repository, if you don't have it, compile it using 'tic' command). Feel free to set up any key bindings you wish here as well, remember default tmux bindings for ctrl+arrows is switching planes.  
@@ -78,7 +82,7 @@ bind -n M-Up select-pane -U
 bind -n M-Down select-pane -D
 ```
 
-### resources
+### Resources
 http://www.nesssoftware.com/home/mwc/manpage.php?page=terminfo  
 https://www.freebsd.org/cgi/man.cgi?query=terminfo&sektion=5  
 http://www.comptechdoc.org/os/linux/howlinuxworks/linux_hltermcommands.html  
