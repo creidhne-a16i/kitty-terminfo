@@ -1,4 +1,4 @@
-#	Reconstructed via infocmp from file: /lib/terminfo/x/xterm-256color
+#	https://github.com/creidhne88/kitty-terminfo
 xterm-kitty-256color|xterm-style terminfo for KiTTY with 256 colors,
 	am,
 	bw,
