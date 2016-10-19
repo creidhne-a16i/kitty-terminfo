@@ -2,7 +2,7 @@
 A bit better terminfo file for KiTTY (a PuTTY fork), based off comparison between xterm-256color, putty-256color and tmux-256color. This is supposed to correct the problems with arrows in tmux and vim, allow nice boxes (aptitude), and generally better represent capabilities of KiTTY than usual xterm\* or putty\* terminfo does.  
   
 ### Installation
-This instruction assumes you have ncurses and libreadlinei6 or 7 installed.
+This instruction assumes you have ncurses-term and libreadlinei6 or 7 installed.
 Clone the repository to your remote machine, then run:  
 ```
 tic -x kitty-terminfo/terminfo/xterm-kitty-256color.ti
@@ -14,11 +14,11 @@ infocmp -xT xterm-kitty-256color
 ```
 Which should display slightly rearranged version of the .ti file you just cloned.  
   
-Close KiTTY. In kitty.ini file, make sure you have
+Close KiTTY. In kitty.ini file, make sure you have shortcuts disabled:
 ```
 shortcuts=no
 ```
-as it interferes with F7 key (used by midnight commander and other apps) and seems to be difficult to rebind.
+It interferes with F7 key (used by midnight commander and other apps) and seems to be difficult to rebind.
 
 Start KiTTY, make sure to keep following settings (last one is most important):
 - Terminal > Keyboard:
@@ -28,11 +28,10 @@ Start KiTTY, make sure to keep following settings (last one is most important):
 - Connection > Data:
  * Terminal-type string: xterm-kitty-256color  
   
-Verify you're running appropriate terminal:
+Verify you're running xterm-kitty-256color
 ```
 echo $TERM
 ```
-which should return "xterm-kitty-256color".  
   
 ### Settings  
   
