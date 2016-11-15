@@ -119,7 +119,7 @@ xterm-kitty-256color|xterm-style terminfo for KiTTY with 256 colors,
 	smkx=\E[?1h\E=,
 	rmkx=\E[?1l\E>,
 	smso=\E[7m,
-	rmso=\E[27m
+	rmso=\E[27m,
 	smul=\E[4m,
 	rmul=\E[24m,
 	rs1=\Ec\E]104\007,
