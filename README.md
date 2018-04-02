@@ -2,7 +2,7 @@
 A bit better terminfo file for KiTTY (a PuTTY fork), based off comparison between xterm-256color, putty-256color and tmux-256color. This is supposed to correct the problems with arrows in tmux and vim, allow nice boxes (aptitude), and generally better represent capabilities of KiTTY than usual xterm\* or putty\* terminfo does.  
   
 ### Installation
-This instruction assumes you have ncurses-term and libreadlinei6 or 7 installed.
+This instruction assumes you have ncurses-term and libreadlinei6 or 7 installed (comes by default with basic Debian installation, and many other packages depend on it, so chances are you already have it installed).
 Clone the repository to your remote machine, then run:  
 ```
 tic -x kitty-terminfo/terminfo/xterm-kitty-256color.ti
@@ -58,7 +58,7 @@ If you disable "application cursor mode" in KiTTY > Terminal > Features, KiTTY w
   
 modifiers don't work with those function keys.  
 
-#### /etc/initrc or ~/.inputrc
+#### /etc/inputrc
 Use codes mentioned above to set up commands you wish the terminal to recognize. Remember to replace ^[ with \e, although entering escape sequence using ctrl+v (this is not paste in terminal!) will also work.
 For example, to use ctrl+left/right arrow to move between words in terminal, makes sure you have following lines in your inputrc file:  
 ```
