@@ -10,9 +10,10 @@ sudo tic -x -o /lib/terminfo/x/ ~/kitty-terminfo/terminfo/xterm-kitty-256color.t
   
 If everything is okay, you should get no messages. Verify with:  
 ```
-infocmp -xT xterm-kitty-256color
+infocmp -xT $TERM
 ```
 Which should display slightly rearranged version of the .ti file you just cloned.  
+Make sure your remote system locales are set to UTF-8, preferably en_US.UTF-8.
   
 Close KiTTY. In kitty.ini file, make sure you have shortcuts disabled:
 ```
