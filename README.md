@@ -5,8 +5,9 @@ A bit better terminfo file for KiTTY (a PuTTY fork), based off comparison betwee
 This instruction assumes you have ncurses-term and libreadlinei6 or 7 installed (comes by default with basic Debian installation, and many other packages depend on it, so chances are you already have it installed).
 Clone the repository to your remote machine, then run:  
 ```
-sudo tic -x -o /lib/terminfo/x/ ~/kitty-terminfo/terminfo/xterm-kitty-256color.ti
+sudo tic -x -o /lib/terminfo/ ~/kitty-terminfo/terminfo/xterm-kitty-256color.ti
 ```
+Make sure the newly created file is /lib/terminfo/x/xterm-kitty-256color.
   
 Make sure your remote system locales are set to UTF-8, preferably en_US.UTF-8.
   
