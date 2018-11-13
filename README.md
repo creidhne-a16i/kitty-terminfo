@@ -8,11 +8,6 @@ Clone the repository to your remote machine, then run:
 sudo tic -x -o /lib/terminfo/x/ ~/kitty-terminfo/terminfo/xterm-kitty-256color.ti
 ```
   
-If everything is okay, you should get no messages. Verify with:  
-```
-infocmp -xT $TERM
-```
-Which should display slightly rearranged version of the .ti file you just cloned.  
 Make sure your remote system locales are set to UTF-8, preferably en_US.UTF-8.
   
 Close KiTTY. In kitty.ini file, make sure you have shortcuts disabled:
@@ -28,12 +23,18 @@ Start KiTTY, make sure to keep following settings (last one is most important):
  * The Function keys and keypad: ESC[n~
 - Connection > Data:
  * Terminal-type string: xterm-kitty-256color  
-  
-Verify you're running xterm-kitty-256color
+
+Verify you're running xterm-kitty-256color:
 ```
 echo $TERM
 ```
-  
+
+Command: 
+```
+infocmp -xT $TERM
+```
+should display slightly rearranged version of the .ti file you cloned at the beginning.  
+
 ### Settings  
   
 Here's the key sequences KiTTY is sending when arrows and function keys are pressed:  
