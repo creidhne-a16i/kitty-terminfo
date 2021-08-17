@@ -1,0 +1,47 @@
+https://invisible-island.net/ncurses/ncurses.faq.html#modified_keys
+
+2 Shift
+3 Alt
+4 Shift + Alt
+5 Ctrl
+6 Shift + Ctrl
+7 Alt + Ctrl
+8 Shift + Alt + Ctrl
+
+F keys - omitting in terminfo due to 4096 bytes constraint, clearing up kitty key shortcuts only
+1	^[[11~^[[12~^[[13~^[[14~    ^[[15~^[[17~^[[18~^[[19~    ^[[20~^[[21~^[[23~^[[24~
+2	^[[23 shift-F2-opens-notepad f3-nothing ^[[26~    ^[[28~ f6-port-forwarding ^[[31~ f8-text-input    ^[[33~^[[34~ none none
+3	^[^[[11~^[^[[12~^[^[[13~ f4-obvious    ^[^[[15~^[^[[17~^[^[[18~^[^[[19~    ^[^[[20~^[^[[21~^[^[[23~^[^[[24~
+
+5	^[[11~ f2-openfile f3-sendfile f4-none    
+
+HOME INS DEL END PGUP PGDN - fixed
+1	^[[1~^[[2~^[[3~^[[4~^[[5~^[[6~
+2	^[[1~ paste ^[[3~^[[4~ scroll-buffer-up scroll-buffer-down
+3	^[^[[1~^[^[[2~^[^[[3~^[^[[4~^[^[[5~^[^[[6~
+4	^[[1~ paste ^[[3~^[[4~ scroll-buffer-up scroll-buffer-down
+5	none
+6	none	
+7	none (except ctrl+alt+del)
+8	none
+
+ARROWS - fixed
+raw
+	^[[A^[[B^[[D^[[C
+	^[[1;2A^[[1;2B^[[1;2D^[[1;2C
+	^[[1;3A^[[1;3B^[[1;3D^[[1;3C
+	^[[1;10A^[[1;10B^[[1;10D^[[1;10C
+	^[[1;5A^[[1;5B^[[1;5D^[[1;5C
+	^[[1;6A^[[1;6B^[[1;6D^[[1;6C
+	^[[1;3A^[[1;3B^[[1;3D^[[1;3C
+	^[[1;6A^[[1;6B^[[1;6D^[[1;6C
+
+tmux
+	^[[A^[[B^[[D^[[C
+	^[[1;2A^[[1;2B^[[1;2D^[[1;2C
+	^[[1;3A^[[1;3B^[[1;3D^[[1;3C
+	^[[1;4A^[[1;4B^[[1;4D^[[1;4C
+	^[[1;5A^[[1;5B^[[1;5D^[[1;5C
+	^[[1;6A^[[1;6B^[[1;6D^[[1;6C
+	^[[1;3A^[[1;3B^[[1;3D^[[1;3C
+	^[[1;6A^[[1;6B^[[1;6D^[[1;6C

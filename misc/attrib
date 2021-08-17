@@ -1,33 +1,633 @@
-Xterm
-|Putty
-||Tmux
-XPT		am,					auto_right_margin - Automatic margins
-X T		AX,					(bool) Does understand ANSI set default fg/bg color (\E[39m  \E[49m). Also uses G0, S0 and E0 values. User definable
-XP		bce,				back_color_erase - Erase screen with background color
- P		bw,					auto_left_margin - cub1 wraps from column 0 to last column. The terminal can can be wrap backwards to the previous line
-X		ccc,				can_change - Terminal can redefine a color
-XPT		colors#256,			max_colors - Maximum number of colors on the screen
-X T		cols#80,			Number of columns in a line
-  T		G0,					boolean capability for the terminal on which screen has been called, the terminal emulation of screen supports multiple character sets. Check bookmarks.
- PT		hs,					Has an extra ``status line'' (xterm doesn't, putty does, tmux does)
-XPT		it#8				tabs initially n spaces
-X T		km,					Has a metakey (shift sets parity bit)
-X T		lines#24,			Number of lines on screen or page
-X		mc5i,				prtr_silent - Printer does not echo on screen
-XPT		mir,				Safe to move while in insert mode
-XPT		msgr,				move_standout_mode - Safe to move in standout modes
- P		ncv#22,				This is a bit-mask of attributes (bold/underline etc) not to be used when colors are enabled. Check bookmarks
-X		npc,				no_pad_char - No padding character
-X T		OTbs,				obsolete, backspaces_with_bs, check bookmarks
-  T		OTpt,				obsolete, has_hardware_tabs, check bookmarks
-XPT		pairs#32767,		max_pairs - Maximum number of color_pairs on screen
- PT		U8#1,				UTF-8 line-graphics with xterm, set to enabled. Uses acsc values
-XPT		xenl,				eat_newline_glitch - newline ignored after 80 cols (concept)
- P		xon,				If the terminal uses xon/xoff handshaking for flow control (it automatically emits ^S back to the host when its input buffers are close to full)
-XP		XT,					Terminal understands special xterm sequences (OSC, mouse tracking).
+# xterm-style terminfo for KiTTY (putty fork) with 256 colors
+# https://github.com/creidhne88/kitty-terminfo
 
-===========================
+tic -x -o ~/.terminfo/ ~/kitty-terminfo/xterm-kitty-256color.ti && infocmp -xT $TERM
 
-X		acsc=``aaffggiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
+echo -e "\Exxx"					will output \n\r after execution
+printf %b "\Exxx"				will not output anything extra after execution
+tput [command] parameters		will send a sequence and use provided parameters
+
+X term - xterm-256color.ti
+|P utty putty-256color.ti
+||T mux - tmux.ti
+|||K itty - chosen value for xterm-kitty-256color.ti
+||||x - [E]cho verified, [S]ource verified, [O]ther verification performed, [D] Does not work
+|||||   [N]ot verified but works or verification not necessary, [V] to be verified, [?] Not able to verify or test
+↓↓↓↓↓
+
+# ----------
+# TERMINAL INITIALIZATION
+# ----------
+# user strings, unknown purpose
+XP K	u6=\E[%i%d;%dR,
+XP K	u7=\E[6n,
+X   	u8=\E[?1;2c,
+ P K	u8=\E[?6c,
+XP K	u9=\E[c,
+
+# initialization strings for the terminal
+XPTK	is= [no value]
+X   	is2=\E[!p\E[?3;4l\E[4l\E>, 
+ P K	is2=\E7\E[r\E[m\E[?7h\E[?1;4;6l\E[4l\E8\E>\E]R,
+ 			\E7 - save cursor
+ 			\E[r - unknown, apparently reset scrolling margins?
+ 			\E[m - first part of sgr0 clear all attributes \E[m\017
+ 			\E[?7h - turn on automatic margins
+			\E[?1;4;6l - unknown
+			\E[4l - exit insert mode
+			\E8 - restore cursor
+			\E> - end part of exit application mode - \E[?1l\E> - so probably go to rmkx
+			\E]R - reset all colors
+  T		is2=\E)0,
+XPTK	is3= [no value]
+
+# path to program to run to initialize the terminal
+XPTK	iprog= [no value]
+
+# name of a file containing long initialization strings
+XPTK	if= [no value]
+
+# reset strings, same numeration and order as is1-3
+X  K	rs1=\Ec\E]104\007, 
+X   	rs2=\E[!p\E[?3;4l\E[4l\E>, 
+ P K	rs2=\E<\E["p\E[50;6"p\Ec\E[?3l\E]R\E[?1000l,
+  T		rs2=\Ec\E[?1000l\E[?25h, 
+XPTK	rs3= [no value found]
+
+# ----------
+# LINE CONTROL AND MOVEMENTS
+# ----------
+XPTKE	il1=\E[L,			terminal can open a new blank line before the line where the cursor is
+							this is done only from the first position of a line.
+							`tput cr; printf aaa; printf %b "\n"; printf bbb; printf %b "\n"; tput cuu1; tput il1; printf test;`
+
+XPTKE	dl1=\E[M,			terminal can delete the line which the cursor is on
+							this is done only from the first position on the line to be deleted.
+							`tput cr; printf aaa; printf %b "\n"; printf bbb; printf %b "\n"; tput cuu1; tput dl1;`
+XPTKN	il=\E[%p1%dL,		version of il1 which takes a single parameter and inserts that many lines
+XPTKN	dl=\E[%p1%dM,		version of dl1 which takes a single parameter and deletes that many lines
+
+XPTK	csr=\E[%i%p1%d;%p2%dr,		terminal has a settable scrolling region (like the vt100), takes top and bottom lines of the scrolling region
+XPTK?	ind=\n, 			To scroll text up, program goes to the bottom left corner of the screen and send the ind (index) string.
+    ?	ind=^J,
+XPTK?	ri=\EM,				To scroll text down, program goes to the top left corner of the screen and sends the ri (reverse index) string.
+							The strings ind and ri are undefined when not on their respective corners of the screen.
+XPTKE	indn=\E[%p1%dS,		scroll forward #1 lines (parameter)
+XP KE	rin=\E[%p1%dT, 		scroll back #1 lines (parameter)
+
+XPTKE	am,					automatic margins (an automatic return and linefeed when the end of a line is reached), initially configurable in KiTTY
+							https://www.ssh.com/ssh/putty/putty-manuals/0.68/Chapter4.html#config-autowrap
+XP KE	smam=\E[?7h,		turn on automatic margins, this mode will make terminal continue from the beginning of the sameafter you reach the end of it
+XP KE	rmam=\E[?7l,		turn off automatic margins
+
+X T D	cols#80,			Number of columns in a line, possibly doesn't work because putty resizes anyway
+X T D	lines#24,			Number of lines on screen or page
+XPTKE	xenl,				eat_newline_glitch - indicate terminal will ignore line-feed immediately after an `am` wrap (concept)
+   KE	bw,					indicate that a `cub1` from the left edge will move to the right edge of the previous row
+							`tput cub1; printf "a";`
+
+ P KE	nel=\r\n,			moves to the first column of the next line, does not matter if the command clears the remainder of the current line
+  T	E	nel=\EE, 			so if the terminal has cr and lf it may still be possible to craft a working nel out of one or both of them
+							
+XPT 	lf= [no value]		line feed? unsure
+   KE	lf=\n
+XPTKE	cr=\r,				carriage return
+    D	cr=^M,				
+
+# If there are parameterized local motions (e.g., move n spaces to the right) these can be given as cud, cub, cuf, and cuu with a single parameter indicating how many spaces to move.
+XPTKE	cuu=\E[%p1%dA, 
+XPTKE	cud=\E[%p1%dB, 
+XPTKE	cuf=\E[%p1%dC, 
+XPTKE	cub=\E[%p1%dD, 
+
+# terminal needs to be in a special mode when running a program that uses above 4 capabilities, enter/exit/reset sequence
+X	N	smcup=\E[?1049h\E[22;0;0t, 
+X	N	rmcup=\E[?1049l\E[23;0;0t, 
+ P	E	smcup=\E[?47h,
+ P	E	rmcup=\E[2J\E[?47l,
+  TKE	smcup=\E[?1049h,
+  TKE	rmcup=\E[?1049l, 
+XPTK?	nrrmc= [no value]	reset
+				KiTTy does not seem to need to be in special mode for that, but those commands seem to save and restore the screen. Without those, quitting aptitude clears the screen instead of restoring what was on it before starting it.
+
+XP KE	cup=\E[%i%p1%d;%p2%dH, 		move to row #1 columns #2
+
+XPTKE	home=\E[H,			fast way to home the cursor (to very upper left corner of screen)
+XPTK?	ll= [no value]		lower-left-hand corner of the screen
+
+XPTKV	hpa=\E[%i%p1%dG,	horizontal absolute cursor addressing
+XPTKV	vpa=\E[%i%p1%dd,	vertical absolute cursor addressing
+		
+XPTKE	sc=\E7,				save cursor
+XPTKE	rc=\E8,				restore cursor
+
+# ----------
+# extra functionality of a "status line" - ncurses implementation does not use any of these capabilities
+# These building-blocks allow access to the X titlebar and icon name as a status line. There are a few problems in using them in entries:
+#
+# a) tsl should have a parameter to denote the column on which to transfer to
+#    the status line.
+# b) the "0" code for xterm updates both icon-title and window title.  Some
+#    window managers such as twm (and possibly window managers descended from
+#    it such as tvtwm, ctwm, and vtwm) track windows by icon-name. Thus, you
+#    don't want to mess with icon-name when using those window managers.
+#
+# The extension "TS" is preferable, because it does not accept a parameter.
+# However, if you are using a non-extended terminfo, "TS" is not visible.
+# source: http://invisible-island.net/ncurses/terminfo.src.html#tic-xterm
+# should be supported in KiTTY because it has settings to disable it in Terminal->Features "Disable remote-controlled window title changing"
+
+ PT	?	hs,					Has an extra "status line"
+		eslok,				eslok pecifies that escape sequences, tabs, etc., work ordinarily in the status line.
+
+ PTK?	tsl=\E]0;,			enter status line/icon-title/window-title (should save cursor position),
+		tsl=\E]2;,			variant to pacify twm-descended window managers (??)
+ PTK?	TS=\E]0;,
+		TS=\E]2;,			variant to pacify twm-descended window managers (??)
+
+ PTK?	fsl=^G,				exit status line/icon-title/window-title (should restore cursor position) -
+XPTK?	wsl= [no value]		if the status line is different length than widh of terminal, specify in numeric capability wsl
+ PTK?	dsl=\E]0;\007,		erase status line
+		dsl=\E]2;\007,		variant to pacify twm-descended window managers (??)
+							all of these seem to not output garbage, but they don't work either. Leaving it in
+	
+# ----------
+# SCREEN CONTROL, DELETIONS
+# ----------
+X   E	clear=\E[H\E[2J,  	clear its screen, leaving the cursor in the home position
+ PTKE	clear=\E[H\E[J, 	[both work the same, chosen the shorter version]
+X   	npc,				indicate terminal does not have a pad character. Ncurses tests this anyway
+ P KN	xon,				If the terminal uses xon/xoff handshaking for flow control (ex. it automatically emits ^S back to the host 
+							when its input buffers are close to full). This capability suppresses the emission of padding.
+							Include padding info anyway so better decisions about relative cost can be made.
+XPTKD	pad= [no value]		specify this if other than a null (zero) character is needed as a pad. 
+							Only the first character of the pad string is used.
+
+XPTKE	el1=\E[1K,			clear from the beginning of the line to the current position inclusive, leaving the cursor where it is
+XPTKE	el=\E[K,			clear from the current position to the end of the line, leaving the cursor where it is
+XPTKE	ed=\E[J,			clear from the current position to the end of the display
+XPTK?	smir=\E[4h,			enter insert mode - this produces weird effects
+XPTK?	rmir=\E[4l,			exit insert mode
+XPTKN	ich1= [no value]	sequence needed to be sent just before sending the character to be inserted
+							should not use both unless terminal actually requires both in combination
+X TKN	ich=\E[%p1%d@,		will repeat the effects of ich1 n times.
+XPTKN	rmp= [no value]		number of milliseconds padding between characters typed while not in insert mode
+
+XPTKN	mir,				Safe to move while in insert mode, affects only inserting speed. Some terminals may not use this due to inner workings
+
+XPTKN	smdc= [no value]	enter delete mode
+XPTKN	rmdc= [no value]	exit delete mode
+
+XPTKN	dch1=\E[P,			delete a single character
+XPTKN	dch=\E[%p1%dP,		delete n characters
+XP KN	ech=\E[%p1%dX,		erase n characters (equivalent to outputting n blanks without moving the cursor)
+X	N	rep=%p1%c\E[%p2%{1}%-%db, 		enter character specified by #1, #2 amount of times
+
+XPTKE	E3=\E[3J,			clear scrollback buffer, supported from 3.0+ kernel, same as xterm's erase-saved-lines
+							controlled in kiTTY in Terminal->Features "Disable remote-controlled clearing of scrollback"
+XPTK 	bel=^G,				bell (audible signal)		
+
+XP	D	flash=\E[?5h$<100/>\E[?5l, 		flashing the screen to indicate an error quietly (a bell replacement)
+  T	D	flash=\Eg, 
+   KE	flash=\E[?5h\E[?5l,				(\E[?5h reverses entire screen, \E[?5l switches it back - delay was ignored, xon?)
+# delay in milliseconds may appear anywhere in a string capability, enclosed in $<..>
+# normally, padding is advisory if the device has the xon capability; it is used for cost computation but does not trigger delays.
+# A '/' suffix indicates that the padding is mandatory and forces a delay of the given number of milliseconds even on devices for which xon is present to indicate flow control.
+# Delay statements seem to be unsupported in KiTTy no matter the set of terminfo flags.
+
+#screen/tmux program capabilities
+T	?	G0,					terminal can deal with ISO 2022 font selection sequences
+X TK	AX,					does understand ANSI set default fg/bg color (\E[39m  \E[49m). Also uses G0, S0 and E0 values
+XP K?	S0= [no value]		Switch charset 'G0' to the specified charset.
+  T	?	S0=\E(%p1%c, 
+XP K?	E0= [no value]		Switch charset 'G0' back to standard charset.
+	?	E0=\E(B,			
+
+# Ms modifies the selection/clipboard.  Its parameters are 
+#       p1 = the storage unit (clipboard, selection or cut buffer)
+#       p2 = the base64-encoded clipboard content.
+X TK?	Ms=\E]52;%p1%s;%p2%s\007,
+
+# ----------
+# TEXT MODES, COLOR
+# ----------
+ PTKN	U8#1,				when set to 1, forces xterm to rely on UTF-8 line-graphics. Set to enabled uses smacs/rmacs/acsc values
+							this is set in KiTTY, Window->Translation, Remote character set as UTF-8 and "Use Unicode line drawing code points"
+							make sure remote machine uses UTF-8 locales
+
+# enter and exit alternate character set mode (used for drawing boxes by programs like aptitude or midnight commander)
+X  KN	smacs=\E(0,
+ PT		smacs=^N,
+X  KN	rmacs=\E(B,
+ PT		rmacs=^O,
+# acsc provides array of box characters above mode uses, wrong string will result in garbage boxes
+X 		acsc=``aaffggiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
  P		acsc=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
-  T		acsc=++\,\,--..00``aaffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
+  TKN	acsc=++\,\,--..00``aaffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
+	N	acsc=++\,\,--..00__``aaffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}c~~
+			kernel 2.6.x fix for SI/SO to wotk with UTF-8 encoding, not included by default
+
+# no idea what PC character display mode is, but putty has it
+# Display PC character #1
+ P K?	dispc=%?%p1%{8}%=%t\E%%G\342\227\230\E%%@%e%p1%{10}%=%t\E%%G\342\227\231\E%%@%e%p1%{12}%=%t\E%%G\342\231\0\E%%@%e%p1%{13}%=%t\E%%G\342\231\252\E%%@%e%p1%{14}%=%t\E%%G\342\231\253\E%%@%e%p1%{15}%=%t\E%%G\342\230\274\E%%@%e%p1%{27}%=%t\E%%G\342\206\220\E%%@%e%p1%{155}%=%t\E%%G\340\202\242\E%%@%e%p1%c%;,
+ P K?	smpch=\E[11m, 		
+ P K?	rmpch=\E[10m, 		
+
+XP K?	enacs=\E(B\E)0, 	enable alternate char set (seems it has something to do with british and german key layouts)
+
+ P	?	s0ds=\E[10m, 		Shift to codeset 0 (Extended Unix Code set 0, ASCII, multibyte character encoding system used for primarily for
+							Japanese, Korean and simplified Chinese) https://en.wikipedia.org/wiki/Extended_Unix_Code
+ P	?	s1ds=\E[11m, 		Shift to codeset 1
+ P	?	s2ds=\E[12m, 		Shift to codeset 2
+XPTK? 	s3ds= [no value]	Shift to codeset 3
+
+# If the cursor needs to be made more visible than normal when it is not on the bottom line (to make, for example, a non-blinking underline into an easier to find block or blinking underline) give this sequence as cvvis. If there is a way to make the cursor completely invisible, give that as civis. The capability cnorm should be given which undoes the effects of both of these modes. [verified with echo]
+X  KD	cvvis=\E[?12;25h,
+ P		cvvis= [no value]
+  TKE	cvvis=\E[34l, 
+XPTKE	civis=\E[?25l,
+X  KD	cnorm=\E[?12l\E[?25h, 
+ P	D	cnorm=\E[?25h, 
+  TKE	cnorm=\E[34h\E[?25h, 
+# In all of those cases, cnorm seems to be a combination of cvvis and civis disabled sequences (ended in 'h' instead of 'l'), useful to know if you want to set up vim to change your cursor in different modes
+
+# enter and exit standout mode (higher visibility attention-getters)
+	
+XPTKE	smso=\E[7m,			enter standout mode
+XPTKE	rmso=\E[27m,		exit standout mode
+XPTK 	msgr,				indicate it is safe to move cursor in standout mode
+
+X  KE	smul=\E[4m,			enter underlining mode
+X  KE	rmul=\E[24m,		exit underlining mode
+
+X T	D	sitm=\E[3m,			enter italic mode
+   KE	sitm= [no value]
+X T	D	ritm=\E[23m, 		exit italic mode
+   KE	ritm= [no value]
+
+X T	D	smxx=\E[9m,			enter crossed-out mode
+   KE	smxx= [no value]
+X T	D	rmxx=\E[29m,		exit crossed-out mode
+   KE	rmxx= [no value]
+							rmxx/smxx describes the ECMA-48 strikeout/crossed-out attributes, as an experimental feature of tmux.
+
+# turning on any of these modes singly may or may not turn off other modes.
+XPTKE	blink=\E[5m,		blinking - by default off in KiTTY, Settings/Terminal "Enable blinking text"
+XPTKE	bold=\E[1m,
+X T D	dim=\E[2m,
+ P K	dim= [no value]
+X T D	invis=\E[8m,		invisible text
+ P K	invis= [no value]	
+XPTK	prot= [no value]	protected
+XPTKE	rev=\E[7m,			reverse video
+
+X   E	sgr0=\E(B\E[m, 		turn off all attribute modes
+ PTKE	sgr0=\E[m\017, 
+
+# https://www.freebsd.org/cgi/man.cgi?query=terminfo&sektion=5 search for:
+# If there is a sequence to set arbitrary combinations of modes, this should be given as sgr (set attributes), taking 9 parameters.
+X   ?	sgr=%?%p9%t\E(0%e\E(B%;\E[0%?%p6%t;1%;%?%p5%t;2%;%?%p2%t;4%;%?%p1%p3%|%t;7%;%?%p4%t;5%;%?%p7%t;8%;m,
+ P K?	sgr=\E[0%?%p1%p6%|%t;1%;%?%p2%t;4%;%?%p1%p3%|%t;7%;%?%p4%t;5%;m%?%p9%t\016%e\017%;,
+  T ?	sgr=\E[0%?%p6%t;1%;%?%p2%t;4%;%?%p1%p3%|%t;7%;%?%p4%t;5%;%?%p5%t;2%;%?%p7%t;8%;m%?%p9%t\016%e\017%;,
+
+XPTKN	colors#0x100,		max_colors - Maximum number of colors on the screen that can be displayed simultaneously
+XPTKN	pairs#0x10000,		max_pairs - Maximum number of color pairs on screen that can be displayed simultaneously
+ P K?	ncv#22,				This is a bit-mask of attributes (bold/underline etc) not to be used when colors are enabled (because they may not work, collide with colors etc).
+XPTK?	op=\E[39;49m,		(original pair) string resets foreground and background colors to their default values for the terminal
+X   ?	oc=\E]104\007		resets all colors or color-pairs to their default values for the terminal
+ P K?	oc=\E]R, 
+  T		oc= [no value]
+XP K?	bce,				indicate terminal will erase screen areas with the current background color rather than the power-up default background
+							(many PC terminal emulators do this), settable in KiTTY in Terminal, default on
+X   E	ccc,				may be present to indicate that colors can be modified, was apparently cancelled in putty
+							http://invisible-island.net/ncurses/terminfo.src.html#t20140330
+							unsupported
+# If so, the initc capability will take a color number (0 to colors - 1) and three more parameters which describe the color.
+X   E	initc=\E]4;%p1%d;rgb\:%p2%{255}%*%{1000}%/%2.2X/%p3%{255}%*%{1000}%/%2.2X/%p4%{255}%*%{1000}%/%2.2X\E\\,
+   K	initc= [no value]	unsupported
+
+# change the current foreground	or background color on a Tektronix-type terminal, setaf (set ANSI foreground) and setab (set ANSI background)
+XPTKN	setaf=\E[%?%p1%{8}%<%t3%p1%d%e%p1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m,
+XPTKN	setab=\E[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m,
+
+# or setf (set foreground) and setb (set background)
+XPTKN	setf= [no value]
+XPTKN	setb= [no value]
+
+X TKD	Ss=\E[%p1%d q, 			used to set the cursor style as described by the DECSCUSR function to a block or underline
+ P K	Ss= [no value]			unsupported
+X TK?	Se=\E[2 q,				resets the cursor style to the terminal power-on default
+ P K	Se= [no value]			unsupported
+
+X T D	Cs=\E]12;%p1%s\007, 	set cursor colour
+ P KV	Cs= [no value]			unsupported
+X T ?	Cr=\E]112\007,			reset cursor colour
+ P KV	Cr= [no value]			unsupported
+
+# ----------
+# TABS
+# ----------
+XPTKE	it#8,				tabs initially n spaces on terminal powerup, here set to 8, KiTTy uses 8
+XPTKE	ht=^I,				advance to next tab stop
+XPTKE	cbt=\E[Z,			back-tab command
+XPTK?	kcbt=\E[Z, 			back-tab key (often shift+tab on modern keyboards) - why is the keycode the same as cbt?
+XPTKE	hts=\EH,			set tab stop in the current column of every row
+XPTKE	tbc=\E[3g,			clear all tab stops (hardware default ones included)
+
+# source https://godoc.org/github.com/xo/terminfo - there's waaaay more of those
+  TKN	OTpt,				obsolete, has_hardware_tabs, indicates has 8-char tabs invoked with ^I
+X TKN	OTbs,				obsolete, backspaces_with_bs, bool capability indicates use of ^H to move left, 
+							if not present, uses OTbc value as sequence to move left
+
+# ----------
+# KEY INPUT, MODIFIERS
+# ----------
+X TKN	km,					Has a meta key which acts as shift key (sets 8th bit instead of parity). Otherwise, software will assume that the 8th bit is parity and it will usually be cleared. 
+X		smm=\E[?1034h,		enter "meta mode", if the above can be switched on/off on demand
+ PTK?	smm= [no value]		
+X		rmm=\E[?1034l,		exit "meta mode"
+ PTK?	rmm= [no value]		
+
+XPTKN	kbs=^?,				backspace key, configure KiTTY to use Control-? for emacs compatibility (seems to be default)
+    N	kbs=\177,			most likely redefined in initial handshake
+							https://www.ssh.com/ssh/putty/putty-manuals/0.68/Chapter4.html#config-backspace
+
+X	?	kb2=\EOE,			seems to be numpad 5 
+ P K?	kb2=\E[G,
+
+ P KN	kspd=^Z,			suspend key (control Z) - yeeeah that one works alright :x
+
+XPTKE	kich1=\E[2~,		"insert character or enter insert mode" "Sent by insert char/enter insert-mode key" - looks to be insert key
+XPTKE	kdch1=\E[3~, 		delete key
+
+X		khome=\EOH			home key
+ PTKE	khome=\E[1~, 
+X 		kend=\EOF,			end key
+ PTKE	kend=\E[4~, 		
+
+XPTKE	kpp=\E[5~,			PageUp (previous page key)
+XPTKE	knp=\E[6~, 			PageDn (next page key)
+
+X   ?	kent=\EOM, 			sent by <return> key (enter) - echo result here is "M"
+		kent=^M,			compiled comes out with \r, echo does nothing
+ PTK	kent= [no value]	not included in compiled, echo does nothing
+
+X TK	kri=\E[1;2A, 		scroll backwards key (up)
+ P		kri=\E[A, 
+X TK	kind=\E[1;2B, 		scroll forward key (down)
+ P		kind=\E[B,
+
+XPTKE	smkx=\E[?1h\E=,		Enter application mode
+XPTKE	rmkx=\E[?1l\E>,		Exit application mode
+
+# normal mode [rmkx] arrows
+X  KV	cuu1=\E[A			up one line
+ PT	V	cuu1=\EM,			both work, but cat shows the upper code
+
+X T	E	cud1=\n,  			down one line
+ P	E	cud1=\ED, 
+	E	cud1=\E[B,			cat shows this code
+   KE	cud1=^J,			all of these work!
+
+XPTKV	cuf1=\E[C,			move right one space
+
+XPTKE	cub1=^H,			move left one space
+	E	cub1=\E[D,
+
+# application mode [smkx] arrows - vim uses this mode
+XPTKO	kcuu1=\EOA,
+XPTKO	kcud1=\EOB,
+XPTKO	kcuf1=\EOC,
+XPTKO	kcub1=\EOD,
+
+# modifier + arrows as per xterm-style info
+# src: https://github.com/tmux/tmux/blob/master/xterm-keys.c
+#	2 Shift
+#	3 Alt
+#	4 Shift + Alt
+#	5 Ctrl
+#	6 Shift + Ctrl
+#	7 Alt + Ctrl
+#	8 Shift + Alt + Ctrl
+# names as per ncurses extended descriptions
+# https://invisible-island.net/ncurses/ncurses.faq.html#modified_keys
+# http://invisible-island.net/ncurses/terminfo.src.html#t20051026
+# These entries will have warnings when checking with tic because the kri/kind capabilities duplicate the kUP/kDN extensions.
+
+# up-arrow key with modifiers
+X TKE	kUP=\E[1;2A,
+X TKE	kUP3=\E[1;3A,
+X TKE	kUP4=\E[1;4A,
+X TKE	kUP5=\E[1;5A,
+X TKE	kUP6=\E[1;6A,
+X TKE	kUP7=\E[1;7A,
+   KE	kUP8=\E[1;8A,
+
+# down-arrow key with modifiers
+X TKE	kDN=\E[1;2B,
+X TKE	kDN3=\E[1;3B,
+X TKE	kDN4=\E[1;4B,
+X TKE	kDN5=\E[1;5B,
+X TKE	kDN6=\E[1;6B,
+X TKE	kDN7=\E[1;7B,
+   KE	kDN8=\E[1;8B,
+
+# right-arrow key with modifiers
+X TKE	kRIT=\E[1;2C,  
+ P		kRIT=\E[C,
+X TKE	kRIT3=\E[1;3C,
+X TKE	kRIT4=\E[1;4C,
+X TKE	kRIT5=\E[1;5C,
+X TKE	kRIT6=\E[1;6C,
+X TKE	kRIT7=\E[1;7C,
+   KE	kRIT8=\E[1;8C,
+	
+# left-arrow key with modifiers
+X TKE	kLFT=\E[1;2D, 
+ P		kLFT=\E[D,
+X TKE	kLFT3=\E[1;3D,
+X TKE	kLFT4=\E[1;4D,
+X TKE	kLFT5=\E[1;5D,
+X TKE	kLFT6=\E[1;6D,
+X TKE	kLFT7=\E[1;7D,
+   KE	kLFT8=\E[1;8D,
+
+2 Shift
+3 Alt
+4 Shift + Alt
+5 Ctrl
+6 Shift + Ctrl
+7 Alt + Ctrl
+8 Shift + Alt + Ctrl
+
+# insert character key with modifiers
+X T E	kIC=\E[2;2~,
+X TKE	kIC3=\E[2;3~,
+X TKE	kIC4=\E[2;4~,
+X TKE	kIC5=\E[2;5~,
+X TKE	kIC6=\E[2;6~,
+X TKE	kIC7=\E[2;7~,
+XPT		kIC8= [no value]
+   KE	kIC8=\E[2;8~,
+
+# KElete character key with modifiers
+X  KE	kDC=\E[3;2~,
+X TKE	kDC3=\E[3;3~, 
+X TKE	kDC4=\E[3;4~,
+X TKE	kDC5=\E[3;5~, 
+X TKE	kDC6=\E[3;6~, 
+X TKE	kDC7=\E[3;7~, 
+XPT		kDC8= [no value]
+   KE	kDC8=\E[3;8~,
+
+# home key with modifiers
+X TKE	kHOM=\E[1;2H, 
+X TKE	kHOM3=\E[1;3H, 
+X TKE	kHOM4=\E[1;4H, 
+X TKE	kHOM5=\E[1;5H,
+X TKE	kHOM6=\E[1;6H, 
+X TKE	kHOM7=\E[1;7H, 
+XPT		kHOM8= [no value]
+   KE	kHOM8=\E[1;8H, 
+
+# end key with modifiers
+X TKE	kEND=\E[1;2F, 
+X TKE	kEND3=\E[1;3F, 
+X TKE	kEND4=\E[1;4F,
+X TKE	kEND5=\E[1;5F, 
+X TKE	kEND6=\E[1;6F, 
+X TKE	kEND7=\E[1;7F,
+XPT		kEND8= [no value]
+   KE	kEND8=\E[1;8F,
+
+# previous page key (PageUp)
+X TKE	kPRV=\E[5;2~, 
+X TKE	kPRV3=\E[5;3~, 
+X TKE	kPRV4=\E[5;4~, 
+X TKE	kPRV5=\E[5;5~,
+X TKE	kPRV6=\E[5;6~, 
+X TKE	kPRV7=\E[5;7~, 
+XPT		kPRV8= [no value]
+   KE	kPRV8=\E[5;8~, 
+
+# next page key (PageDn)
+X TKE	kNXT=\E[6;2~, 
+X TKE	kNXT3=\E[6;3~, 
+X TKE	kNXT4=\E[6;4~,
+X TKE	kNXT5=\E[6;5~, 
+X TKE	kNXT6=\E[6;6~, 
+X TKE	kNXT7=\E[6;7~,
+XPT		kNXT8= [no value]
+   KE	kNXT8=\E[6;8~,
+
+# function keys
+X T		kf1=\EOP, 
+ P K	kf1=\E[11~, 
+X T		kf2=\EOQ, 
+ P K	kf2=\E[12~, 
+X T		kf3=\EOR, 
+ P K	kf3=\E[13~,
+X T		kf4=\EOS, 
+ P K	kf4=\E[14~, 
+XPTK	kf5=\E[15~, 
+XPTK	kf6=\E[17~, 
+XPTK	kf7=\E[18~,
+XPTK	kf8=\E[19~, 
+XPTK	kf9=\E[20~, 
+XPTK	kf10=\E[21~,
+XPTK	kf11=\E[23~, 
+XPTK	kf12=\E[24~, 
+
+# beyond this point putty does NOT generate any reasonable key codes for F- keys. Fixable in KiTTY with shortcuts
+# is this even needed? Omitting.
+# if you need these bound, necessary keycodes acn be found here https://invisible-island.net/xterm/xterm-function-keys.html
+
+X T		kf13=\E[1;2P, 
+ P 		kf13=\E[25~,
+X T		kf14=\E[1;2Q,
+ P 		kf14=\E[26~
+X T		kf15=\E[1;2R, 
+ P 		kf15=\E[28~,
+X T		kf16=\E[1;2S, 
+ P 		kf16=\E[29~,
+X T		kf17=\E[15;2~, 
+ P 		kf17=\E[31~,
+X T		kf18=\E[17;2~,
+ P 		kf18=\E[32~
+X T		kf19=\E[18;2~, 
+ P 		kf19=\E[33~,
+X T		kf20=\E[19;2~, 
+ P 		kf20=\E[34~,
+X T		kf21=\E[20;2~,
+X T		kf22=\E[21;2~, 
+X T		kf23=\E[23;2~, 
+X T		kf24=\E[24;2~,
+
+X T		kf25=\E[1;5P, 
+X T		kf26=\E[1;5Q, 
+X T		kf27=\E[1;5R, 
+X T		kf28=\E[1;5S,
+X T		kf29=\E[15;5~, 
+X T		kf30=\E[17;5~, 
+X T		kf31=\E[18;5~,
+X T		kf32=\E[19;5~, 
+X T		kf33=\E[20;5~, 
+X T		kf34=\E[21;5~,
+X T		kf35=\E[23;5~, 
+X T		kf36=\E[24;5~, 
+
+X T		kf37=\E[1;6P, 
+X T		kf38=\E[1;6Q,
+X T		kf39=\E[1;6R, 
+X T		kf40=\E[1;6S, 
+X T		kf41=\E[15;6~,
+X T		kf42=\E[17;6~, 
+X T		kf43=\E[18;6~, 
+X T		kf44=\E[19;6~,
+X T		kf45=\E[20;6~, 
+X T		kf46=\E[21;6~, 
+X T		kf47=\E[23;6~,
+X T		kf48=\E[24;6~, 
+
+X T		kf49=\E[1;3P, 
+X T		kf50=\E[1;3Q,
+X T		kf51=\E[1;3R, 
+X T		kf52=\E[1;3S, 
+X T		kf53=\E[15;3~, 
+X T		kf54=\E[17;3~,
+X T		kf55=\E[18;3~, 
+X T		kf56=\E[19;3~, 
+X T		kf57=\E[20;3~,
+X T		kf58=\E[21;3~, 
+X T		kf59=\E[23;3~, 
+X T		kf60=\E[24;3~,
+
+X T		kf61=\E[1;4P, 
+X T		kf62=\E[1;4Q, 
+X T		kf63=\E[1;4R, 	
+X T		kf63=\E[1;4R, 
+# ----------
+# MISC
+# ----------
+# printing supported by KiTTY, have to pick a printer in configuration (Terminal)
+X   ?	mc5i,				printer will not echo on screen
+X	?	mc0=\E[i,			print contents of the screen
+ PT	?	mc0= [no value]
+X	?	mc4=\E[4i, 			turn off the printer
+ PT	?	mc4= [no value]
+X	?	mc5=\E[5i, 			turn on	the printer. When the printer is on, all text sent to the terminal will be sent to the printer
+ PT	?	mc5= [no value]
+XPT	?	mc5p= [no value]	variation that takes one parameter, and leaves the printer on for as many characters as the value of the parameter,
+							then turns the printer off. The parameter should not exceed 255. Will print mc4 sequence transparently too.
+
+XP K	XT,					Terminal understands special xterm sequences (OSC, mouse tracking).
+
+XPTK	kmous=\E[M,			Mouse event has occured. Be careful assigning this. The ncurses wants to interpret it as
+							KEY_MOUSE for use by terminals and emulators like xterm that can return mouse-tracking 
+							information in the keyboard-input stream. I recommend disabling mouse events it in KiTTY 
+							configuration, and leave it purely client side for copying purposes. 
+							Left in for compatibility if you do decide to use it anyway.
+
+# The HP library (as of mid-1995, their term.h file version 70.1) appears to have the System V capabilities up to SVr1 level. After that, it supports two nonstandard caps meml and memu corresponding to the old termcap :ml:, :mu: capabilities (-whatever those are). After that, it supports caps plab_norm, label_on, label_off, and key_f11..key_f63 capabilities like SVr4's. This makes the HP binary format incompatible with SVr4's.
+X   ?	meml=\El,			
+X   ?	memu=\Em, 
